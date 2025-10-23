@@ -1,0 +1,101 @@
+server:
+  port: 8084
+
+spring:
+  application:
+    name: reviews-api
+  
+  # Database Configuration
+  datasource:
+    url: jdbc:h2:mem:reviewsdb
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: 
+  
+  # JPA Configuration
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+        format_sql: true
+  
+  # H2 Console
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+  
+  # RabbitMQ Configuration
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+    template:
+      exchange: message_exchange
+      routing-key: review
+
+# JWT Configuration
+jwt:
+  secret: ${JWT_SECRET:tu-clave-secreta-muy-segura-cambiala-en-produccion}
+  expiration: 86400000
+
+# RabbitMQ Exchange Configuration
+rabbitmq:
+  exchange:
+    name: message_exchange
+  routing-keys:
+    review-created: review.created
+    review-updated: review.updated
+    review-deleted: review.deleted
+    rating-changed: review.rating.changed
+
+# Application Configuration
+app:
+  reviews:
+    max-rating: 5
+    min-rating: 1
+    pagination:
+      default-size: 10
+      max-size: 100
+
+# Actuator Configuration
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always
+
+# Logging
+logging:
+  level:
+    root: INFO
+    com.iwellness.reviews: DEBUG
+    org.springframework.web: DEBUG
+    org.springframework.amqp: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+
+---
+# PostgreSQL Profile (Producción)
+spring:
+  config:
+    activate:
+      on-profile: postgres
+  datasource:
+    url: jdbc:postgresql://localhost:5432/reviews_db
+    driver-class-name: org.postgresql.Driver
+    username: postgres
+    password: postgres
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect

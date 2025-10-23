@@ -1,0 +1,25 @@
+package com.iwellness.reviews.dto;
+
+import jakarta.validation.constraints.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class ReviewRequestDTO {
+
+    @NotNull(message = "El ID del servicio es obligatorio")
+    private Long serviceId;
+
+    @NotNull(message = "La calificación es obligatoria")
+    @Min(value = 1, message = "La calificación mínima es 1")
+    @Max(value = 5, message = "La calificación máxima es 5")
+    private Integer rating;
+
+    @Size(max = 1000, message = "El comentario no puede exceder 1000 caracteres")
+    private String comment;
+}
