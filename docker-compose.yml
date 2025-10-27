@@ -1,12 +1,12 @@
 version: '3.9'
 
 services:
-  reviews_api:
+  reviews-api:
     build:
       context: ./reviews
       dockerfile: Dockerfile
     image: reviews-api:latest
-    container_name: reviews_api
+    container_name: reviews-api
     ports:
       - "${REVIEWS_API_PORT:-8084}:8084"
     environment:
