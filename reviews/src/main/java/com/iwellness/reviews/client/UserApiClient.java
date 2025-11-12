@@ -13,6 +13,6 @@ import com.iwellness.reviews.dto.UsuarioDTO;
 public interface UserApiClient {
 
     // Este método llamará a GET http://localhost:8082/usuarios/{id}
-    @GetMapping("/{id}")
+    @GetMapping("/perfil-publico/{id}")
     UsuarioDTO findById(@PathVariable("id") Long id);
 }
