@@ -16,8 +16,8 @@ public class ReviewResponseDTO {
     private Long id;
     private Long serviceId;
     private Long userId;
-    private String username; // Obtenido de Users API
-    private String userImageUrl; // Obtenido de Users API
+    private String nombre; // Obtenido de Users API
+    private String foto; // Obtenido de Users API
     private Integer rating;
     private String comment;
     private LocalDateTime createdAt;

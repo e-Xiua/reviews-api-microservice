@@ -293,13 +293,13 @@ public class ReviewService {
                             ? user.getNombre() + " " + user.getApellido() 
                             : "Usuario Anónimo";
         
-        String userImageUrl = (user != null) ? user.getUrlFotoPerfil() : null;
+        String userImageUrl = (user != null) ? user.getFoto() : null;
         return ReviewResponseDTO.builder()
                 .id(review.getId())
                 .serviceId(review.getServiceId())
                 .userId(review.getUserId())
-                .username(username)
-                .userImageUrl(userImageUrl)
+                .nombre(username)
+                .foto(userImageUrl)
                 .rating(review.getRating())
                 .comment(review.getComment())
                 .createdAt(review.getCreatedAt())
