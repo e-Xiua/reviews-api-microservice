@@ -9,9 +9,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ServiceRatingDTO {
-
-    private Long serviceId;
+public class RatingDTO {
+    private Long entityId;
+    private String entityType;
     private Double averageRating;
     private Long totalReviews;
     private RatingDistribution distribution;

@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 import com.iwellness.reviews.dto.ServicioDTO;
 
-@FeignClient(name = "servicio-ms", url = "${feign.client.servicio.url:http://localhost:8080}/api/servicios")
+@FeignClient(name = "servicio-ms", url = "${feign.client.servicio.url:http://localhost:8080}/api/servicio")
 public interface ServicioApiClient {
 
     @GetMapping("/search/{id}")
