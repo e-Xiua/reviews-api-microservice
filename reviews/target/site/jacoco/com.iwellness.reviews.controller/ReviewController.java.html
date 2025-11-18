@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ReviewController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">reviews-api</a> &gt; <a href="index.source.html" class="el_package">com.iwellness.reviews.controller</a> &gt; <span class="el_source">ReviewController.java</span></div><h1>ReviewController.java</h1><pre class="source lang-java linenums">package com.iwellness.reviews.controller;
+
+import java.util.List;
+
+import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.iwellness.reviews.dto.RatingDTO;
+import com.iwellness.reviews.dto.ReviewRequestDTO;
+import com.iwellness.reviews.dto.ReviewResponseDTO;
+import com.iwellness.reviews.service.ReviewService;
+
+import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
+
+<span class="fc" id="L27">@Slf4j</span>
+@RestController
+@RequestMapping(&quot;/api/reviews&quot;)
+public class ReviewController {
+
+    private final ReviewService reviewService;
+
+<span class="fc" id="L34">    public ReviewController(ReviewService reviewService) {</span>
+<span class="fc" id="L35">        this.reviewService = reviewService;</span>
+<span class="fc" id="L36">    }</span>
+
+    @PostMapping
+    public ResponseEntity&lt;ReviewResponseDTO&gt; createReview(
+            @Valid @RequestBody ReviewRequestDTO requestDTO,
+            @RequestHeader(&quot;X-User-Id&quot;) Long userId) {
+<span class="fc" id="L42">        log.info(&quot;POST /api/reviews - User: {}, Entity: {} ({})&quot;, </span>
+<span class="fc" id="L43">                userId, requestDTO.getEntityType(), requestDTO.getEntityId());</span>
+<span class="fc" id="L44">        ReviewResponseDTO response = reviewService.createReview(requestDTO, userId);</span>
+<span class="fc" id="L45">        return ResponseEntity.status(HttpStatus.CREATED).body(response);</span>
+    }
+
+    @PutMapping(&quot;/{reviewId}&quot;)
+    public ResponseEntity&lt;ReviewResponseDTO&gt; updateReview(
+            @PathVariable Long reviewId,
+            @Valid @RequestBody ReviewRequestDTO requestDTO,
+            @RequestHeader(&quot;X-User-Id&quot;) Long userId) {
+<span class="fc" id="L53">        log.info(&quot;PUT /api/reviews/{} - User: {}&quot;, reviewId, userId);</span>
+<span class="fc" id="L54">        ReviewResponseDTO response = reviewService.updateReview(reviewId, requestDTO, userId);</span>
+<span class="fc" id="L55">        return ResponseEntity.ok(response);</span>
+    }
+
+    @GetMapping(&quot;/{reviewId}&quot;)
+    public ResponseEntity&lt;ReviewResponseDTO&gt; getReviewById(@PathVariable Long reviewId) {
+<span class="fc" id="L60">        log.info(&quot;GET /api/reviews/{}&quot;, reviewId);</span>
+<span class="nc" id="L61">        ReviewResponseDTO response = reviewService.getReviewById(reviewId);</span>
+<span class="nc" id="L62">        return ResponseEntity.ok(response);</span>
+    }
+
+    @DeleteMapping(&quot;/{reviewId}&quot;)
+    public ResponseEntity&lt;Void&gt; deleteReview(
+            @PathVariable Long reviewId,
+            @RequestHeader(&quot;X-User-Id&quot;) Long userId) {
+<span class="fc" id="L69">        log.info(&quot;DELETE /api/reviews/{} - User: {}&quot;, reviewId, userId);</span>
+<span class="fc" id="L70">        reviewService.deleteReview(reviewId, userId);</span>
+<span class="fc" id="L71">        return ResponseEntity.noContent().build();</span>
+    }
+
+    @GetMapping(&quot;/entity/{entityType}/{entityId}&quot;)
+    public ResponseEntity&lt;Page&lt;ReviewResponseDTO&gt;&gt; getReviewsByEntity(
+            @PathVariable String entityType,
+            @PathVariable Long entityId,
+            @RequestParam(defaultValue = &quot;0&quot;) int page,
+            @RequestParam(defaultValue = &quot;10&quot;) int size,
+            @RequestParam(defaultValue = &quot;createdAt&quot;) String sortBy) {
+<span class="fc" id="L81">        log.info(&quot;GET /api/reviews/entity/{}/{} - Page: {}, Size: {}&quot;, entityType, entityId, page, size);</span>
+<span class="fc" id="L82">        Page&lt;ReviewResponseDTO&gt; reviews = reviewService.getReviewsByEntity(entityId, entityType, page, size, sortBy);</span>
+<span class="fc" id="L83">        return ResponseEntity.ok(reviews);</span>
+    }
+
+    @GetMapping(&quot;/entity/{entityType}/{entityId}/rating&quot;)
+    public ResponseEntity&lt;RatingDTO&gt; getEntityRating(
+            @PathVariable String entityType,
+            @PathVariable Long entityId) {
+<span class="fc" id="L90">        log.info(&quot;GET /api/reviews/entity/{}/{}/rating&quot;, entityType, entityId);</span>
+<span class="fc" id="L91">        RatingDTO rating = reviewService.getRatingByEntity(entityId, entityType);</span>
+<span class="fc" id="L92">        return ResponseEntity.ok(rating);</span>
+    }
+
+    @GetMapping(&quot;/entity/{entityType}/{entityId}/recent&quot;)
+    public ResponseEntity&lt;List&lt;ReviewResponseDTO&gt;&gt; getRecentReviews(
+            @PathVariable String entityType,
+            @PathVariable Long entityId,
+            @RequestParam(defaultValue = &quot;5&quot;) int limit) {
+<span class="nc" id="L100">        log.info(&quot;GET /api/reviews/entity/{}/{}/recent - Limit: {}&quot;, entityType, entityId, limit);</span>
+<span class="nc" id="L101">        List&lt;ReviewResponseDTO&gt; reviews = reviewService.getRecentReviewsByEntity(entityId, entityType, limit);</span>
+<span class="nc" id="L102">        return ResponseEntity.ok(reviews);</span>
+    }
+
+}
+
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

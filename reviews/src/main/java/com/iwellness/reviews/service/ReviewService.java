@@ -134,6 +134,17 @@ public class ReviewService {
     }
 
     /**
+     * Get a review by its ID
+     */
+    @Transactional(readOnly = true)
+    public ReviewResponseDTO getReviewById(Long reviewId) {
+        Review review = reviewRepository.findById(reviewId)
+            .orElseThrow(() -> new ReviewNotFoundException("Review not found with ID: " + reviewId));
+        
+        return mapToResponseDTO(review);
+    }
+
+    /**
      * Unified method to get reviews by entity
      */
     @Transactional(readOnly = true)

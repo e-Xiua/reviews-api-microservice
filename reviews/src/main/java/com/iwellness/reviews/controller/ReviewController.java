@@ -55,6 +55,13 @@ public class ReviewController {
         return ResponseEntity.ok(response);
     }
 
+    @GetMapping("/{reviewId}")
+    public ResponseEntity<ReviewResponseDTO> getReviewById(@PathVariable Long reviewId) {
+        log.info("GET /api/reviews/{}", reviewId);
+        ReviewResponseDTO response = reviewService.getReviewById(reviewId);
+        return ResponseEntity.ok(response);
+    }
+
     @DeleteMapping("/{reviewId}")
     public ResponseEntity<Void> deleteReview(
             @PathVariable Long reviewId,

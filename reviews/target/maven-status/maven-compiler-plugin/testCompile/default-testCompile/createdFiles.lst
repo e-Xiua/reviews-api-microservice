@@ -1,0 +1,5 @@
+com/iwellness/reviews/controller/ReviewControllerTest.class
+com/iwellness/reviews/integration/IntegrationTestConfig.class
+com/iwellness/reviews/repository/ReviewRepositoryTest.class
+com/iwellness/reviews/integration/ReviewIntegrationTest.class
+com/iwellness/reviews/service/ReviewServiceTest.class

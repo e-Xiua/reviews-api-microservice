@@ -1,6 +1,8 @@
 /home/santiagovera/e-xiua/reviews-api-microservice/reviews/src/main/java/com/iwellness/reviews/dto/ReviewRequestDTO.java
 /home/santiagovera/e-xiua/reviews-api-microservice/reviews/src/main/java/com/iwellness/reviews/event/ReviewUpdatedEvent.java
+/home/santiagovera/e-xiua/reviews-api-microservice/reviews/src/main/java/com/iwellness/reviews/service/ReviewableService.java
 /home/santiagovera/e-xiua/reviews-api-microservice/reviews/src/main/java/com/iwellness/reviews/client/ServicioApiClient.java
+/home/santiagovera/e-xiua/reviews-api-microservice/reviews/src/main/java/com/iwellness/reviews/model/EntityType.java
 /home/santiagovera/e-xiua/reviews-api-microservice/reviews/src/main/java/com/iwellness/reviews/client/UserApiClient.java
 /home/santiagovera/e-xiua/reviews-api-microservice/reviews/src/main/java/com/iwellness/reviews/config/FeignClientInterceptor.java
 /home/santiagovera/e-xiua/reviews-api-microservice/reviews/src/main/java/com/iwellness/reviews/dto/ReviewResponseDTO.java
@@ -13,16 +15,15 @@
 /home/santiagovera/e-xiua/reviews-api-microservice/reviews/src/main/java/com/iwellness/reviews/dto/UsuarioDTO.java
 /home/santiagovera/e-xiua/reviews-api-microservice/reviews/src/main/java/com/iwellness/reviews/client/CorsConfigurationProperties.java
 /home/santiagovera/e-xiua/reviews-api-microservice/reviews/src/main/java/com/iwellness/reviews/service/ReviewService.java
-/home/santiagovera/e-xiua/reviews-api-microservice/reviews/src/main/java/com/iwellness/reviews/dto/ServiceRatingDTO.java
+/home/santiagovera/e-xiua/reviews-api-microservice/reviews/src/main/java/com/iwellness/reviews/model/Reviewable.java
 /home/santiagovera/e-xiua/reviews-api-microservice/reviews/src/main/java/com/iwellness/reviews/exception/DuplicateReviewException.java
 /home/santiagovera/e-xiua/reviews-api-microservice/reviews/src/main/java/com/iwellness/reviews/repository/ReviewRepository.java
 /home/santiagovera/e-xiua/reviews-api-microservice/reviews/src/main/java/com/iwellness/reviews/ReviewsApiApplication.java
-/home/santiagovera/e-xiua/reviews-api-microservice/reviews/src/main/java/com/iwellness/reviews/dto/ProviderRatingDTO.java
 /home/santiagovera/e-xiua/reviews-api-microservice/reviews/src/main/java/com/iwellness/reviews/exception/ErrorResponse.java
 /home/santiagovera/e-xiua/reviews-api-microservice/reviews/src/main/java/com/iwellness/reviews/exception/ReviewNotFoundException.java
+/home/santiagovera/e-xiua/reviews-api-microservice/reviews/src/main/java/com/iwellness/reviews/dto/RatingDTO.java
 /home/santiagovera/e-xiua/reviews-api-microservice/reviews/src/main/java/com/iwellness/reviews/event/RatingChangedEvent.java
 /home/santiagovera/e-xiua/reviews-api-microservice/reviews/src/main/java/com/iwellness/reviews/publisher/ReviewEventPublisher.java
 /home/santiagovera/e-xiua/reviews-api-microservice/reviews/src/main/java/com/iwellness/reviews/exception/GlobalExceptionHandler.java
-/home/santiagovera/e-xiua/reviews-api-microservice/reviews/src/main/java/com/iwellness/reviews/dto/ProviderReviewRequestDTO.java
 /home/santiagovera/e-xiua/reviews-api-microservice/reviews/src/main/java/com/iwellness/reviews/event/ReviewCreatedEvent.java
 /home/santiagovera/e-xiua/reviews-api-microservice/reviews/src/main/java/com/iwellness/reviews/entity/Review.java

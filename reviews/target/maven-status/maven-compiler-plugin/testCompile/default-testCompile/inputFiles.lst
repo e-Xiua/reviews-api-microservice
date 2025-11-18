@@ -1,0 +1,5 @@
+/home/santiagovera/e-xiua/reviews-api-microservice/reviews/src/test/java/com/iwellness/reviews/controller/ReviewControllerTest.java
+/home/santiagovera/e-xiua/reviews-api-microservice/reviews/src/test/java/com/iwellness/reviews/integration/ReviewIntegrationTest.java
+/home/santiagovera/e-xiua/reviews-api-microservice/reviews/src/test/java/com/iwellness/reviews/integration/IntegrationTestConfig.java
+/home/santiagovera/e-xiua/reviews-api-microservice/reviews/src/test/java/com/iwellness/reviews/repository/ReviewRepositoryTest.java
+/home/santiagovera/e-xiua/reviews-api-microservice/reviews/src/test/java/com/iwellness/reviews/service/ReviewServiceTest.java
