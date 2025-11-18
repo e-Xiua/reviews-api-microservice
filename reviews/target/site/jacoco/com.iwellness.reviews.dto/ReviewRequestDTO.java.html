@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ReviewRequestDTO.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">reviews-api</a> &gt; <a href="index.source.html" class="el_package">com.iwellness.reviews.dto</a> &gt; <span class="el_source">ReviewRequestDTO.java</span></div><h1>ReviewRequestDTO.java</h1><pre class="source lang-java linenums">package com.iwellness.reviews.dto;
+
+import com.iwellness.reviews.model.EntityType;
+
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+<span class="pc bnc" id="L14" title="All 38 branches missed.">@Data</span>
+<span class="fc" id="L15">@NoArgsConstructor</span>
+<span class="fc" id="L16">@AllArgsConstructor</span>
+<span class="pc" id="L17">@Builder</span>
+public class ReviewRequestDTO {
+
+    @NotNull(message = &quot;El ID de la entidad es obligatorio&quot;)
+<span class="fc" id="L21">    private Long entityId;</span>
+
+    @NotNull(message = &quot;El tipo de entidad es obligatorio (SERVICE o PROVIDER)&quot;)
+<span class="fc" id="L24">    private EntityType entityType;</span>
+
+    @NotNull(message = &quot;La calificación es obligatoria&quot;)
+    @Min(value = 1, message = &quot;La calificación mínima es 1&quot;)
+    @Max(value = 5, message = &quot;La calificación máxima es 5&quot;)
+<span class="fc" id="L29">    private Integer rating;</span>
+
+    @Size(max = 1000, message = &quot;El comentario no puede exceder 1000 caracteres&quot;)
+<span class="fc" id="L32">    private String comment;</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

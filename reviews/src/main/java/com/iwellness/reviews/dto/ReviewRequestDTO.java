@@ -1,6 +1,11 @@
 package com.iwellness.reviews.dto;
 
-import jakarta.validation.constraints.*;
+import com.iwellness.reviews.model.EntityType;
+
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -12,8 +17,11 @@ import lombok.NoArgsConstructor;
 @Builder
 public class ReviewRequestDTO {
 
-    @NotNull(message = "El ID del servicio es obligatorio")
-    private Long serviceId;
+    @NotNull(message = "El ID de la entidad es obligatorio")
+    private Long entityId;
+
+    @NotNull(message = "El tipo de entidad es obligatorio (SERVICE o PROVIDER)")
+    private EntityType entityType;
 
     @NotNull(message = "La calificación es obligatoria")
     @Min(value = 1, message = "La calificación mínima es 1")

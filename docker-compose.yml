@@ -1,33 +1,63 @@
 version: '3.9'
 
 services:
-  reviews_api:
+  # PostgreSQL Database Service (NEW - Add this!)
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: reviews_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"  # Expose for local debugging
+    networks:
+      - tesisNetwork
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  # Reviews API Service
+  reviews-api:
     build:
       context: ./reviews
       dockerfile: Dockerfile
+    depends_on:
+      postgres:
+        condition: service_healthy  # Wait for DB
     image: reviews-api:latest
-    container_name: reviews_api
+    container_name: reviews-api
     ports:
       - "${REVIEWS_API_PORT:-8084}:8084"
     environment:
-      # Spring Profile
-      - SPRING_PROFILES_ACTIVE=docker
+      # Spring Profile - THIS IS THE KEY!
+      - SPRING_PROFILES_ACTIVE=postgres
+      
+      # Database Configuration (overrides profile)
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/reviews_db
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=postgres
       
       # Server Configuration
       - SERVER_PORT=${SERVER_PORT:-8084}
       
-      # RabbitMQ Configuration
-      - RABBITMQ_HOST=${RABBITMQ_HOST:-rabbitmq}
-      - RABBITMQ_PORT=${RABBITMQ_PORT:-5672}
-      - RABBITMQ_USERNAME=${RABBITMQ_USERNAME:-user}
-      - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD:-user}
+      # RabbitMQ Configuration (Spring Boot format)
+      - SPRING_RABBITMQ_HOST=${RABBITMQ_HOST:-rabbitmq}
+      - SPRING_RABBITMQ_PORT=${RABBITMQ_PORT:-5672}
+      - SPRING_RABBITMQ_USERNAME=${RABBITMQ_USERNAME:-user}
+      - SPRING_RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD:-user}
       
       # Feign Clients URLs
       - PREFERENCIAS_SERVICE_URL=${PREFERENCIAS_SERVICE_URL:-http://user-preferences-api:8081}
       - TURISTA_SERVICE_URL=${TURISTA_SERVICE_URL:-http://admin-users-api:8082}
       - SERVICIO_SERVICE_URL=${SERVICIO_SERVICE_URL:-http://providers-api:8080}
-
-      # Java Options (construido desde variables separadas)
+      
+      # Java Options
       - JAVA_OPTS=-Xms${JAVA_OPTS_XMS:-256m} -Xmx${JAVA_OPTS_XMX:-512m}
     
     networks:
@@ -41,6 +71,11 @@ services:
       timeout: 10s
       retries: 3
       start_period: 60s
+
+# Define the volume at root level
+volumes:
+  postgres_data:
+    driver: local
 
 networks:
   tesisNetwork:

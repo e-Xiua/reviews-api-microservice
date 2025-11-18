@@ -14,10 +14,11 @@ import lombok.NoArgsConstructor;
 public class ReviewResponseDTO {
 
     private Long id;
-    private Long serviceId;
+    private Long entityId;
+    private String entityType; // Add this field
     private Long userId;
-    private String username; // Obtenido de Users API
-    private String userImageUrl; // Obtenido de Users API
+    private String nombre;
+    private String foto;
     private Integer rating;
     private String comment;
     private LocalDateTime createdAt;

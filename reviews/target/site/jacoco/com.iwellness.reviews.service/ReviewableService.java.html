@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ReviewableService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">reviews-api</a> &gt; <a href="index.source.html" class="el_package">com.iwellness.reviews.service</a> &gt; <span class="el_source">ReviewableService.java</span></div><h1>ReviewableService.java</h1><pre class="source lang-java linenums">package com.iwellness.reviews.service;
+
+import org.springframework.stereotype.Service;
+
+import com.iwellness.reviews.client.ServicioApiClient;
+import com.iwellness.reviews.client.UserApiClient;
+import com.iwellness.reviews.model.EntityType;
+import com.iwellness.reviews.model.Reviewable;
+
+import lombok.extern.slf4j.Slf4j;
+
+<span class="fc" id="L12">@Slf4j</span>
+@Service
+public class ReviewableService {
+
+    private final ServicioApiClient servicioApiClient;
+    private final UserApiClient userApiClient;
+
+<span class="fc" id="L19">    public ReviewableService(ServicioApiClient servicioApiClient, UserApiClient userApiClient) {</span>
+<span class="fc" id="L20">        this.servicioApiClient = servicioApiClient;</span>
+<span class="fc" id="L21">        this.userApiClient = userApiClient;</span>
+<span class="fc" id="L22">    }</span>
+
+    // Method that accepts EntityType enum
+    public Reviewable getReviewableEntity(EntityType entityType, Long entityId) {
+        try {
+<span class="pc bpc" id="L27" title="2 of 3 branches missed.">            switch (entityType) {</span>
+                case SERVICE:
+<span class="fc" id="L29">                    return servicioApiClient.getServicioById(entityId);</span>
+                case PROVIDER:
+<span class="nc" id="L31">                    return userApiClient.findById(entityId);</span>
+                default:
+<span class="nc" id="L33">                    log.warn(&quot;Unsupported entity type: {}&quot;, entityType);</span>
+<span class="nc" id="L34">                    return null;</span>
+                
+            }
+<span class="nc" id="L37">        } catch (Exception e) {</span>
+<span class="nc" id="L38">            log.error(&quot;Error fetching {} with ID {}: {}&quot;, entityType, entityId, e.getMessage());</span>
+<span class="nc" id="L39">            return null;</span>
+        }
+    }
+
+    // Overloaded method that accepts String for backward compatibility
+    public Reviewable getReviewableEntity(String entityType, Long entityId) {
+        try {
+<span class="nc" id="L46">            EntityType type = EntityType.valueOf(entityType.toUpperCase());</span>
+<span class="nc" id="L47">            return getReviewableEntity(type, entityId);</span>
+<span class="nc" id="L48">        } catch (IllegalArgumentException e) {</span>
+<span class="nc" id="L49">            log.warn(&quot;Invalid entity type string: {}&quot;, entityType);</span>
+<span class="nc" id="L50">            return null;</span>
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

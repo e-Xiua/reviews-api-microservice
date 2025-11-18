@@ -1,0 +1,16 @@
+# Test data y resultados temporales
+test-results/
+test-logs/
+*.log
+
+# Reportes de cobertura
+target/site/
+coverage/
+
+# Datos de WireMock temporales (excepto mappings)
+test-data/wiremock/__files/*.json
+test-data/wiremock/__admin/
+
+# Base de datos de test
+*.db
+*.db-journal
