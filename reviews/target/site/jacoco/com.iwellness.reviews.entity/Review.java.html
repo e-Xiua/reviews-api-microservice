@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Review.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">reviews-api</a> &gt; <a href="index.source.html" class="el_package">com.iwellness.reviews.entity</a> &gt; <span class="el_source">Review.java</span></div><h1>Review.java</h1><pre class="source lang-java linenums">package com.iwellness.reviews.entity;
+
+import java.time.LocalDateTime;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Entity
+@Table(name = &quot;reviews&quot;, uniqueConstraints = {
+    @UniqueConstraint(columnNames = {&quot;entity_type&quot;, &quot;entity_id&quot;, &quot;user_id&quot;})
+})
+<span class="pc bnc" id="L27" title="All 78 branches missed.">@Data</span>
+<span class="fc" id="L28">@NoArgsConstructor</span>
+<span class="fc" id="L29">@AllArgsConstructor</span>
+<span class="pc" id="L30">@Builder</span>
+public class Review {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+<span class="fc" id="L35">    private Long id;</span>
+
+    @NotNull(message = &quot;El tipo de entidad es obligatorio&quot;)
+    @Column(name = &quot;entity_type&quot;, nullable = false, length = 20)
+<span class="fc" id="L39">    private String entityType; // &quot;servicio&quot; o &quot;proveedor&quot;</span>
+
+    @NotNull(message = &quot;El ID de la entidad es obligatorio&quot;)
+    @Column(name = &quot;entity_id&quot;, nullable = false)
+<span class="fc" id="L43">    private Long entityId;</span>
+
+    // Mantener serviceId por compatibilidad con código existente
+    @Column(name = &quot;service_id&quot;)
+<span class="fc" id="L47">    private Long serviceId;</span>
+
+    @NotNull(message = &quot;El ID del usuario es obligatorio&quot;)
+    @Column(name = &quot;user_id&quot;, nullable = false)
+<span class="fc" id="L51">    private Long userId;</span>
+
+    @NotNull(message = &quot;La calificación es obligatoria&quot;)
+    @Min(value = 1, message = &quot;La calificación mínima es 1&quot;)
+    @Max(value = 5, message = &quot;La calificación máxima es 5&quot;)
+    @Column(nullable = false)
+<span class="fc" id="L57">    private Integer rating;</span>
+
+    @Size(max = 1000, message = &quot;El comentario no puede exceder 1000 caracteres&quot;)
+    @Column(columnDefinition = &quot;TEXT&quot;)
+<span class="fc" id="L61">    private String comment;</span>
+
+    @Column(name = &quot;created_at&quot;, nullable = false, updatable = false)
+<span class="fc" id="L64">    private LocalDateTime createdAt;</span>
+
+    @Column(name = &quot;updated_at&quot;)
+<span class="fc" id="L67">    private LocalDateTime updatedAt;</span>
+
+    @PrePersist
+    protected void onCreate() {
+<span class="fc" id="L71">        createdAt = LocalDateTime.now();</span>
+<span class="fc" id="L72">        updatedAt = LocalDateTime.now();</span>
+<span class="fc" id="L73">    }</span>
+
+    @PreUpdate
+    protected void onUpdate() {
+<span class="fc" id="L77">        updatedAt = LocalDateTime.now();</span>
+<span class="fc" id="L78">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

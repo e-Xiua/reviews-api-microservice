@@ -1,0 +1,228 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ReviewService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">reviews-api</a> &gt; <a href="index.source.html" class="el_package">com.iwellness.reviews.service</a> &gt; <span class="el_source">ReviewService.java</span></div><h1>ReviewService.java</h1><pre class="source lang-java linenums">package com.iwellness.reviews.service;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.iwellness.reviews.client.UserApiClient;
+import com.iwellness.reviews.dto.RatingDTO;
+import com.iwellness.reviews.dto.ReviewRequestDTO;
+import com.iwellness.reviews.dto.ReviewResponseDTO;
+import com.iwellness.reviews.dto.UsuarioDTO;
+import com.iwellness.reviews.entity.Review;
+import com.iwellness.reviews.exception.DuplicateReviewException;
+import com.iwellness.reviews.exception.ReviewNotFoundException;
+import com.iwellness.reviews.exception.UnauthorizedReviewAccessException;
+import com.iwellness.reviews.model.Reviewable;
+import com.iwellness.reviews.publisher.ReviewEventPublisher;
+import com.iwellness.reviews.repository.ReviewRepository;
+
+import feign.FeignException;
+import lombok.extern.slf4j.Slf4j;
+
+<span class="fc" id="L29">@Slf4j</span>
+@Service
+public class ReviewService {
+
+    private final ReviewRepository reviewRepository;
+    private final ReviewEventPublisher reviewEventPublisher;
+    private final UserApiClient userApiClient;
+    private final ReviewableService reviewableService; // New service to fetch reviewable entities
+
+    public ReviewService(ReviewRepository reviewRepository, 
+                        ReviewEventPublisher reviewEventPublisher, 
+                        UserApiClient userApiClient,
+<span class="fc" id="L41">                        ReviewableService reviewableService) {</span>
+<span class="fc" id="L42">        this.reviewRepository = reviewRepository;</span>
+<span class="fc" id="L43">        this.reviewEventPublisher = reviewEventPublisher;</span>
+<span class="fc" id="L44">        this.userApiClient = userApiClient;</span>
+<span class="fc" id="L45">        this.reviewableService = reviewableService;</span>
+<span class="fc" id="L46">    }</span>
+
+    /**
+     * Unified method to create a review for any Reviewable entity
+     */
+    @Transactional
+    public ReviewResponseDTO createReview(ReviewRequestDTO requestDTO, Long userId) {
+<span class="fc" id="L53">        log.info(&quot;Creating review for {} {} by user {}&quot;, </span>
+<span class="fc" id="L54">                requestDTO.getEntityType(), requestDTO.getEntityId(), userId);</span>
+
+        // Verify the entity exists and is reviewable
+<span class="fc" id="L57">        Reviewable reviewable = reviewableService.getReviewableEntity(</span>
+<span class="fc" id="L58">                requestDTO.getEntityType(), requestDTO.getEntityId());</span>
+        
+<span class="pc bpc" id="L60" title="1 of 2 branches missed.">        if (reviewable == null) {</span>
+<span class="nc" id="L61">            throw new IllegalArgumentException(&quot;Entity not found or not reviewable&quot;);</span>
+        }
+
+        // Check for duplicate review
+<span class="fc bfc" id="L65" title="All 2 branches covered.">        if (reviewRepository.existsByEntityTypeAndEntityIdAndUserId(</span>
+<span class="fc" id="L66">                requestDTO.getEntityType().toString(), requestDTO.getEntityId(), userId)) {</span>
+<span class="fc" id="L67">            throw new DuplicateReviewException(&quot;User already has a review for this entity&quot;);</span>
+        }
+
+<span class="fc" id="L70">        Review review = Review.builder()</span>
+<span class="fc" id="L71">                .entityType(requestDTO.getEntityType().toString())</span>
+<span class="fc" id="L72">                .entityId(requestDTO.getEntityId())</span>
+<span class="fc" id="L73">                .userId(userId)</span>
+<span class="fc" id="L74">                .rating(requestDTO.getRating())</span>
+<span class="fc" id="L75">                .comment(requestDTO.getComment())</span>
+<span class="fc" id="L76">                .build();</span>
+
+<span class="fc" id="L78">        Review savedReview = reviewRepository.save(review);</span>
+<span class="fc" id="L79">        log.info(&quot;Review created with ID: {}&quot;, savedReview.getId());</span>
+
+        // Publish events
+<span class="fc" id="L82">        reviewEventPublisher.publishReviewCreated(savedReview);</span>
+        
+<span class="fc" id="L84">        return mapToResponseDTO(savedReview);</span>
+    }
+
+    /**
+     * Unified method to update any review
+     */
+    @Transactional
+    public ReviewResponseDTO updateReview(Long reviewId, ReviewRequestDTO requestDTO, Long userId) {
+<span class="fc" id="L92">        log.info(&quot;Updating review {} by user {}&quot;, reviewId, userId);</span>
+
+<span class="fc" id="L94">        Review review = reviewRepository.findById(reviewId)</span>
+<span class="pc" id="L95">                .orElseThrow(() -&gt; new ReviewNotFoundException(&quot;Review not found&quot;));</span>
+
+<span class="fc bfc" id="L97" title="All 2 branches covered.">        if (!review.getUserId().equals(userId)) {</span>
+<span class="fc" id="L98">            throw new UnauthorizedReviewAccessException(&quot;No permission to modify this review&quot;);</span>
+        }
+
+<span class="fc" id="L101">        Integer oldRating = review.getRating();</span>
+<span class="fc" id="L102">        review.setRating(requestDTO.getRating());</span>
+<span class="fc" id="L103">        review.setComment(requestDTO.getComment());</span>
+
+<span class="fc" id="L105">        Review updatedReview = reviewRepository.save(review);</span>
+<span class="fc" id="L106">        log.info(&quot;Review updated: {}&quot;, reviewId);</span>
+
+        // Publish events
+<span class="fc" id="L109">        reviewEventPublisher.publishReviewUpdated(updatedReview);</span>
+
+<span class="fc" id="L111">        return mapToResponseDTO(updatedReview);</span>
+    }
+
+    /**
+     * Unified method to delete any review
+     */
+    @Transactional
+    public void deleteReview(Long reviewId, Long userId) {
+<span class="fc" id="L119">        log.info(&quot;Deleting review {} by user {}&quot;, reviewId, userId);</span>
+
+<span class="fc" id="L121">        Review review = reviewRepository.findById(reviewId)</span>
+<span class="pc" id="L122">                .orElseThrow(() -&gt; new ReviewNotFoundException(&quot;Review not found&quot;));</span>
+
+<span class="pc bpc" id="L124" title="1 of 2 branches missed.">        if (!review.getUserId().equals(userId)) {</span>
+<span class="nc" id="L125">            throw new UnauthorizedReviewAccessException(&quot;No permission to delete this review&quot;);</span>
+        }
+
+<span class="fc" id="L128">        String entityType = review.getEntityType();</span>
+<span class="fc" id="L129">        Long entityId = review.getEntityId();</span>
+        
+<span class="fc" id="L131">        reviewRepository.delete(review);</span>
+<span class="fc" id="L132">        log.info(&quot;Review deleted: {}&quot;, reviewId);</span>
+
+<span class="fc" id="L134">    }</span>
+
+    /**
+     * Get a review by its ID
+     */
+    @Transactional(readOnly = true)
+    public ReviewResponseDTO getReviewById(Long reviewId) {
+<span class="fc" id="L141">        Review review = reviewRepository.findById(reviewId)</span>
+<span class="pc" id="L142">            .orElseThrow(() -&gt; new ReviewNotFoundException(&quot;Review not found with ID: &quot; + reviewId));</span>
+        
+<span class="nc" id="L144">        return mapToResponseDTO(review);</span>
+    }
+
+    /**
+     * Unified method to get reviews by entity
+     */
+    @Transactional(readOnly = true)
+    public Page&lt;ReviewResponseDTO&gt; getReviewsByEntity(Long entityId, String entityType, 
+                                                     int page, int size, String sortBy) {
+<span class="fc" id="L153">        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, sortBy));</span>
+<span class="fc" id="L154">        Page&lt;Review&gt; reviews = reviewRepository.findByEntityTypeAndEntityId(entityType, entityId, pageable);</span>
+<span class="fc" id="L155">        return reviews.map(this::mapToResponseDTO);</span>
+    }
+
+    /**
+     * Unified method to get rating for any entity
+     */
+    @Transactional(readOnly = true)
+    public RatingDTO getRatingByEntity(Long entityId, String entityType) {
+<span class="fc" id="L163">        Double averageRating = reviewRepository.calculateAverageRatingByEntity(entityType, entityId);</span>
+<span class="fc" id="L164">        Long totalReviews = reviewRepository.countByEntityTypeAndEntityId(entityType, entityId);</span>
+
+<span class="fc" id="L166">        RatingDTO.RatingDistribution distribution = RatingDTO.RatingDistribution.builder()</span>
+<span class="fc" id="L167">                .fiveStars(reviewRepository.countByEntityTypeAndEntityIdAndRating(entityType, entityId, 5))</span>
+<span class="fc" id="L168">                .fourStars(reviewRepository.countByEntityTypeAndEntityIdAndRating(entityType, entityId, 4))</span>
+<span class="fc" id="L169">                .threeStars(reviewRepository.countByEntityTypeAndEntityIdAndRating(entityType, entityId, 3))</span>
+<span class="fc" id="L170">                .twoStars(reviewRepository.countByEntityTypeAndEntityIdAndRating(entityType, entityId, 2))</span>
+<span class="fc" id="L171">                .oneStar(reviewRepository.countByEntityTypeAndEntityIdAndRating(entityType, entityId, 1))</span>
+<span class="fc" id="L172">                .build();</span>
+
+<span class="fc" id="L174">        return RatingDTO.builder()</span>
+<span class="fc" id="L175">                .entityId(entityId)</span>
+<span class="fc" id="L176">                .entityType(entityType)</span>
+<span class="pc bpc" id="L177" title="1 of 2 branches missed.">                .averageRating(averageRating != null ? averageRating : 0.0)</span>
+<span class="fc" id="L178">                .totalReviews(totalReviews)</span>
+<span class="fc" id="L179">                .distribution(distribution)</span>
+<span class="fc" id="L180">                .build();</span>
+    }
+
+    /**
+     * Unified method to get recent reviews
+     */
+    @Transactional(readOnly = true)
+    public List&lt;ReviewResponseDTO&gt; getRecentReviewsByEntity(Long entityId, String entityType, int limit) {
+<span class="nc" id="L188">        Pageable pageable = PageRequest.of(0, limit);</span>
+<span class="nc" id="L189">        List&lt;Review&gt; reviews = reviewRepository.findRecentByEntity(entityType, entityId, pageable);</span>
+<span class="nc" id="L190">        return reviews.stream()</span>
+<span class="nc" id="L191">                .map(this::mapToResponseDTO)</span>
+<span class="nc" id="L192">                .collect(Collectors.toList());</span>
+    }
+
+    // Keep existing methods for user reviews, etc.
+
+    /**
+     * Unified mapping to response DTO
+     */
+    private ReviewResponseDTO mapToResponseDTO(Review review) {
+<span class="fc" id="L201">        UsuarioDTO user = null;</span>
+        try {
+<span class="fc" id="L203">            user = userApiClient.findById(review.getUserId());</span>
+<span class="nc" id="L204">        } catch (FeignException e) {</span>
+<span class="nc" id="L205">            log.error(&quot;Error fetching user data for ID: {}. Cause: {}&quot;, review.getUserId(), e.getMessage());</span>
+<span class="fc" id="L206">        }</span>
+
+<span class="pc bpc" id="L208" title="2 of 4 branches missed.">        String username = (user != null &amp;&amp; user.getNombre() != null) </span>
+<span class="fc" id="L209">                ? user.getNombre() + &quot; &quot; + user.getApellido() </span>
+<span class="pc" id="L210">                : &quot;Usuario Anónimo&quot;;</span>
+        
+<span class="pc bpc" id="L212" title="1 of 2 branches missed.">        String userImageUrl = (user != null) ? user.getFoto() : null;</span>
+        
+<span class="fc" id="L214">        return ReviewResponseDTO.builder()</span>
+<span class="fc" id="L215">                .id(review.getId())</span>
+<span class="fc" id="L216">                .entityId(review.getEntityId())</span>
+<span class="fc" id="L217">                .entityType(review.getEntityType())</span>
+<span class="fc" id="L218">                .userId(review.getUserId())</span>
+<span class="fc" id="L219">                .nombre(username)</span>
+<span class="fc" id="L220">                .foto(userImageUrl)</span>
+<span class="fc" id="L221">                .rating(review.getRating())</span>
+<span class="fc" id="L222">                .comment(review.getComment())</span>
+<span class="fc" id="L223">                .createdAt(review.getCreatedAt())</span>
+<span class="fc" id="L224">                .updatedAt(review.getUpdatedAt())</span>
+<span class="fc" id="L225">                .build();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

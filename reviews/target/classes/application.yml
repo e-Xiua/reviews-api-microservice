@@ -1,6 +1,12 @@
 server:
   port: 8084
 
+# CORS Configuration
+cors:
+  allowed-origins:
+    - http://localhost:4200
+    - http://localhost:3000
+
 spring:
   application:
     name: reviews-api
@@ -117,7 +123,8 @@ feign:
       url: ${TURISTA_SERVICE_URL:http://admin_users_api:8082}
 
 ---
-# PostgreSQL Profile (Producción)
+---
+# PostgreSQL Profile (Production)
 spring:
   config:
     activate:
@@ -129,7 +136,47 @@ spring:
     password: postgres
   jpa:
     hibernate:
-      ddl-auto: validate
+      ddl-auto: update  # Create/update tables automatically
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
+  flyway:
+    enabled: false  # Disable Flyway temporarily for development
+
+---
+# Test Profile (for docker-compose.test.yml)
+spring:
+  config:
+    activate:
+      on-profile: test
+  datasource:
+    url: jdbc:postgresql://postgres-test:5432/reviews_test_db
+    driver-class-name: org.postgresql.Driver
+    username: test_user
+    password: test_password
+  jpa:
+    hibernate:
+      ddl-auto: create-drop  # Clean schema for each test run
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+  flyway:
+    enabled: true
+    clean-disabled: false  # Allow cleaning for tests
+  rabbitmq:
+    host: rabbitmq-test
+    port: 5672
+    username: test_user
+    password: test_password
+
+# Test server port
+server:
+  port: 9091  # Puerto alto para ambiente de tests (evita conflictos)
+
+# More verbose logging for tests
+logging:
+  level:
+    com.iwellness.reviews: DEBUG
+    org.springframework.test: DEBUG
