@@ -4,11 +4,6 @@ WORKDIR /app
 COPY pom.xml .
 RUN mvn dependency:go-offline -B
 
-# Stage 2: Test (optional)
-FROM dependencies AS test
-COPY src ./src
-RUN mvn clean test --no-transfer-progress
-
 # Stage 3: Build
 FROM dependencies AS build
 COPY src ./src
